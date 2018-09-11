@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 配置类型别名-->
+    <typeAliases>
+        <!--批量起别名:包名下所有别名是类名-->
+        <!--容易在控制台引起乱码-->
+        <package name="com.qcj.pojo"/>
+    </typeAliases>
+
+    <!--                注释这些把这些交由spring 创建                  -->
+    <!--属性配置和加载外部属性文件-->
+    <!--<properties resource="com/qcj/config/jdbc.properties"></properties>-->
+    <!-- 环境 -->
+    <!--<environments default="development">
+        &lt;!&ndash; 具体环境： id:当前环境的唯一标示 可以配置多个数据库&ndash;&gt;
+        <environment id="development">
+            &lt;!&ndash; 事务管理器 type:类型 &ndash;&gt;
+            <transactionManager type="JDBC"/>
+            &lt;!&ndash; 数据源： type:POOLED &ndash;&gt;
+            <dataSource type="POOLED">
+                &lt;!&ndash; 获取连接的四个参数 &ndash;&gt;
+                <property name="driver" value="${mysqlDriver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${user}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>-->
+    <!-- 映射器 -->
+    <mappers>
+        <!--映射文件的位置-->
+        <!--批量加载映射文件：mapper接口和mapper映射文件必须同包同名-->
+        <package name="com/qcj/mapper"/>
+    </mappers>
+</configuration>

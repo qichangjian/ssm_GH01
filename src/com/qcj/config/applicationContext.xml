@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 扫描service包 创建service对象 -->
+    <context:component-scan base-package="com.qcj.service"/>
+
+    <!--创建管理连接：四个参数 注释mybatis中连接-->
+    <context:property-placeholder location="classpath:com/qcj/config/jdbc.properties"/>
+    <bean id="ds" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${mysqlDriver}"/>
+        <property name="url" value="${url}"/>
+        <!--用户名不要用username不然直接会取到Administrator-->
+        <property name="username" value="${user}"/>
+        <property name="password" value="${password}"/>
+    </bean>
+    <!--sqlSessionFactory-->
+    <bean id="ssf" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="ds"/>                                       <!--连接数据库-->
+        <property name="configLocation" value="classpath:com/qcj/config/mybatis.xml"/><!--加载mybatis配置文件-->
+    </bean>
+    <!--sqlSession:由工厂管理，不用创建了-->
+    <!--mapper创建：由ssf创建
+        方式一：单个创建
+        方式二：批量创建（选用这个）
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.qcj.mapper"/><!--指明是哪个包中的mapper-->
+        <property name="sqlSessionFactoryBeanName" value="ssf"/><!--由谁创建ssf,注意这里用value是个名字-->
+    </bean>
+
+    <!--事务管理： -->
+    <!--1事务管理器：-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="ds"/> <!--事务管理那个数据库-->
+    </bean>
+    <!--2事务策略：只读,事务的隔离级别等
+        需要使用tx: 怎样方法添加怎样的事务
+        配置不同数据库语句操作的事务策略
+    -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="query*" read-only="true"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 3织入事务（声明式事务，通过aop）：在service包下的方法执行sql语句的时候织入事务-->
+    <aop:config>
+        <aop:pointcut id="myPointCut" expression="execution(* com.qcj.service..*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="myPointCut"/>
+    </aop:config>
+</beans>
